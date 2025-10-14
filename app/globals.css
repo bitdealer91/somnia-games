@@ -5,12 +5,7 @@
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -30,6 +25,11 @@ body {
   background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;
+}
+
+/* In portrait use only MobileScreen2 assets; hide page BG_1 */
+@media (orientation: portrait) {
+  .page-bg { background-image: none !important; background-color: #000; }
 }
 
 /* Desktop/landscape: make background smaller like before */
@@ -71,6 +71,19 @@ html, body {
   will-change: transform;     /* promote layer */
   transform: translateZ(0);   /* GPU compositing */
 }
+
+.portrait-only { display: none; }
+.landscape-only { display: block; }
+
+@media (orientation: portrait) {
+  .portrait-only { display: block; }
+  .landscape-only { display: none; }
+}
+
+/* Mobile screen wrapper */
+.mobile-screen { position: relative; width: 100vw; height: 100svh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.mobile-stage { position: relative; width: 390px; height: 844px; overflow: hidden; }
+.mobile-stage img { display: block; }
 
 /* Small-height landscape phones: push joystick lower */
 @media (orientation: landscape) and (max-height: 480px) {
