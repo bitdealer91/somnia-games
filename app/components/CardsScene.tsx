@@ -83,7 +83,8 @@ export default function CardsScene({ items }: { items: CardItem[] }) {
 		<div className="relative" style={{ width: STAGE_WIDTH, height: STAGE_HEIGHT }}>
 			{orderedItems.map((item) => {
 				const isActive = activeId === item.id;
-				const isFlipped = flippedIds.has(item.id);
+				// Only allow the active (foreground) card to show its back side
+				const isFlipped = isActive && flippedIds.has(item.id);
 				const { rx = 0, ry = 0 } = tiltById[item.id] || {};
 
 				// translation required to move card center to stage center
