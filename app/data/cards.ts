@@ -4,6 +4,8 @@ export type CardData = {
 	description?: string;
 	frontImageSrc?: string;
 	backImageSrc?: string;
+    websiteUrl?: string;
+    xUrl?: string;
 	x: number;
 	y: number;
 };
@@ -14,6 +16,8 @@ export const cards: CardData[] = [
 		title: "",
 		description: "",
 		backImageSrc: "/cards/back/card-1.png",
+		websiteUrl: "https://neuroguardians.com",
+		xUrl: "https://x.com/neuroguardians",
 		x: 3,
 		y: 128,
 	},
@@ -22,6 +26,8 @@ export const cards: CardData[] = [
 		title: "",
 		description: "",
 		backImageSrc: "/cards/back/card-2.png",
+		websiteUrl: "https://warzonewarriors.xyz",
+		xUrl: "https://x.com/warzone_somi",
 		x: 319,
 		y: 128,
 	},

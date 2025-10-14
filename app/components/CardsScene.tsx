@@ -10,6 +10,8 @@ export type CardItem = {
 	description?: string;
 	frontImageSrc?: string;
 	backImageSrc?: string;
+    websiteUrl?: string;
+    xUrl?: string;
 	x: number;
 	y: number;
 };
@@ -95,12 +97,17 @@ export default function CardsScene({ items }: { items: CardItem[] }) {
 
 				const transform = `translate(${isActive ? dx + activeOffsetX : 0}px, ${isActive ? dy : 0}px) scale(${scale}) rotateX(${rx}deg) rotateY(${ry}deg)`;
 
-				const cardProps: Card3DProps = {
+                const cardProps: Card3DProps = {
 					id: item.id,
 					title: item.title ?? "",
 					description: item.description ?? "",
 					frontImageSrc: item.frontImageSrc ?? defaultFront,
 					backImageSrc: item.backImageSrc,
+                    websiteUrl: item.websiteUrl,
+                    xUrl: item.xUrl,
+                    // Example hotspot defaults (tweak per actual artwork)
+                    websiteHotspot: { x: 24, y: 170, width: 136, height: 28 },
+                    xHotspot: { x: 24, y: 200, width: 90, height: 24 },
 					isActive,
 					isFlipped,
 					onPress: () => handlePress(item.id),
