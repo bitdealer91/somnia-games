@@ -6,12 +6,7 @@
   --foreground: #ededed;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+
 
 /* Optional: if you still want to support auto dark, comment out the block above
    and re-enable this media query. Keeping site default dark for consistency. */
@@ -20,4 +15,82 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  overscroll-behavior: none; /* prevent scroll chaining */
+}
+
+.page-bg {
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+}
+
+/* In portrait use only MobileScreen2 assets; hide page BG_1 */
+@media (orientation: portrait) {
+  .page-bg { background-image: none !important; background-color: #000; }
+}
+
+/* Desktop/landscape: make background smaller like before */
+@media (orientation: landscape) and (min-width: 769px) {
+  .page-bg {
+    background-size: 100% auto; /* full width */
+    /* crop some bottom area by shifting bg down */
+    --bg-crop-bottom: 120px; /* adjust as needed */
+    background-position: center calc(100% + var(--bg-crop-bottom));
+  }
+}
+
+/* Prevent horizontal scroll on narrow landscape */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden; /* lock page scroll; StageScaler handles fit */
+}
+
+/* Reduce shimmer/ripple artifacts on GIF/text by forcing own layer and hiding backface */
+.joystick img {
+  image-rendering: -webkit-optimize-contrast;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+.headline-img {
+  position: absolute;
+  left: 0;
+  top: 380px; /* desktop/landscape baseline to match original */
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Stage coordinates for joystick (desktop baseline) */
+.joystick {
+  left: 213px;
+  top: 284px;
+  contain: paint;             /* isolate repaints */
+  will-change: transform;     /* promote layer */
+  transform: translateZ(0);   /* GPU compositing */
+}
+
+.portrait-only { display: none; }
+.landscape-only { display: block; }
+
+@media (orientation: portrait) {
+  .portrait-only { display: block; }
+  .landscape-only { display: none; }
+}
+
+/* Mobile screen wrapper */
+.mobile-screen { position: relative; width: 100vw; height: 100svh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.mobile-stage { position: relative; width: 390px; height: 844px; overflow: hidden; }
+.mobile-stage img { display: block; }
+
+/* Small-height landscape phones: push joystick lower */
+@media (orientation: landscape) and (max-height: 480px) {
+  .joystick { top: 460px !important; }
+}
+
+/* Portrait adjustments */
+@media (orientation: portrait) {
+  /* place joystick onto platform by stage coordinates; no bottom anchoring */
+  .joystick { left: 213px; top: 284px; }
+  /* lower the headline a bit for portrait readability */
+  .headline-img { position: absolute; left: 0; top: 520px; }
 }

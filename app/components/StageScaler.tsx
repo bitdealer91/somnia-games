@@ -37,11 +37,11 @@ export default function StageScaler({ baseWidth, baseHeight, align = "center", o
 		return "items-center justify-center";
 	}, [align]);
 
-	return (
-		<div ref={containerRef} className={`w-screen h-screen overflow-hidden flex ${justify} bg-black/0`} style={{ paddingLeft: offsetX, paddingTop: offsetY, opacity: mounted ? 1 : 0 }}>
+    return (
+        <div ref={containerRef} className={`w-screen h-screen overflow-hidden flex ${justify} bg-black/0`} style={{ paddingLeft: offsetX, paddingTop: offsetY, opacity: mounted ? 1 : 0, boxSizing: "border-box" }}>
             <div
-                className="relative will-change-transform"
-                style={{ width: baseWidth, height: baseHeight, transform: `translateZ(0px) scale(${scale})`, transformOrigin: "left top" }}
+				className="relative will-change-transform"
+				style={{ width: baseWidth, height: baseHeight, transform: `translateZ(0px) scale(${Math.round(scale * 100) / 100})`, transformOrigin: "left top" }}
             >
 				{children}
 			</div>
