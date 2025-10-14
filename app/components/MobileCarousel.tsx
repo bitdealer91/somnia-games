@@ -46,19 +46,18 @@ export default function MobileCarousel({ items }: Props) {
     const threshold = 60;
     const w = 390; // frame width
     if (Math.abs(dragX) > threshold) {
-      // animate out
       setIsSnapping(true);
       const dir = dragX < 0 ? -1 : 1;
-      setDragX(dir * w);
+      setDragX(dir * (w + 40));
       setTimeout(() => {
         move(dir === -1 ? 1 : -1);
         setIsSnapping(false);
         setDragX(0);
-      }, 200);
+      }, 260);
     } else {
       setIsSnapping(true);
       setDragX(0);
-      setTimeout(() => setIsSnapping(false), 150);
+      setTimeout(() => setIsSnapping(false), 220);
     }
   };
 
@@ -96,24 +95,37 @@ export default function MobileCarousel({ items }: Props) {
   const w = 390;
   const p = Math.max(-1, Math.min(1, dragX / w));
   const scaleCenter = 1 - 0.2 * Math.abs(p);
-  const scaleLeft = 0.7 + 0.3 * Math.max(p, 0);
-  const scaleRight = 0.7 + 0.3 * Math.max(-p, 0);
+  // side cards keep full scale; only parallax/rotation to mimic crop, not shrink
+  const scaleLeft = 1;
+  const scaleRight = 1;
 
   return (
-    <div className="absolute inset-0" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+    <div className="absolute inset-0" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} style={{ zIndex: 3 }}>
+      {/* Track moves entire triplet so вся карточка едет целиком */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          transform: `translateX(${dragX}px)`,
+          transition: isSnapping ? "transform 260ms cubic-bezier(0.22,1,0.36,1)" : undefined,
+          willChange: "transform",
+          zIndex: 3,
+        }}
+      >
       {/* left card */}
+      {/* left full card (mostly outside, shows ~73px) */}
       <img
         src={triplet[0].frontSrc}
         alt="left"
         style={{
           position: "absolute",
-          left: 0,
+          left: -175, // -(fullWidth - visibleWidth) = -(248-73)
           top: 184,
-          width: 73,
+          width: 248,
           height: 344,
           zIndex: 3,
-          transform: `translateY(${sway(0).dy}px) translateX(${dragX * 0.4}px) scale(${scaleLeft}) rotateY(${p * 10}deg) rotateZ(${sway(0).deg}deg)`,
-          transition: isSnapping ? "transform 180ms ease-out" : undefined,
+          transform: `translateY(${sway(0).dy}px) rotateY(${p * 10}deg) rotateZ(${sway(0).deg}deg)`,
+          transition: isSnapping ? "transform 260ms ease-out" : undefined,
           transformOrigin: "center",
         }}
       />
@@ -130,27 +142,29 @@ export default function MobileCarousel({ items }: Props) {
           height: 353,
           zIndex: 4,
           cursor: "pointer",
-          transform: `translateY(${sway(1).dy}px) translateX(${dragX * 0.6}px) scale(${scaleCenter}) rotateZ(${sway(1).deg}deg)`,
-          transition: isSnapping ? "transform 180ms ease-out" : undefined,
+          transform: `translateY(${sway(1).dy}px) scale(${scaleCenter}) rotateZ(${sway(1).deg}deg)`,
+          transition: isSnapping ? "transform 260ms ease-out" : undefined,
           transformOrigin: "center",
         }}
       />
       {/* right card */}
+      {/* right full card (mostly outside, shows ~73px) */}
       <img
         src={triplet[2].frontSrc}
         alt="right"
         style={{
           position: "absolute",
-          left: 317,
+          left: 317, // 390 - visibleWidth(73)
           top: 178,
-          width: 73,
+          width: 248,
           height: 354,
           zIndex: 3,
-          transform: `translateY(${sway(2).dy}px) translateX(${dragX * 0.8}px) scale(${scaleRight}) rotateY(${p * -10}deg) rotateZ(${sway(2).deg}deg)`,
-          transition: isSnapping ? "transform 180ms ease-out" : undefined,
+          transform: `translateY(${sway(2).dy}px) rotateY(${p * -10}deg) rotateZ(${sway(2).deg}deg)`,
+          transition: isSnapping ? "transform 260ms ease-out" : undefined,
           transformOrigin: "center",
         }}
       />
+      </div>
       {/* detail overlay (Screen3-like) */}
       {showDetail && (
         <div
