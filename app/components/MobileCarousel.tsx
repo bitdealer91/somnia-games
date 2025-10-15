@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export type MobileCarouselItem = {
   id: string;
@@ -29,6 +29,7 @@ export default function MobileCarousel({ items }: Props) {
   const FRAME_W = 390;
   const CARD_W = FRAME_W - CARD_PEEK; // snapped column width
 
+  // helper: programmatic navigation if ever needed
   const move = useCallback((dir: number) => {
     const next = (active + dir + count) % count;
     setActive(next);
@@ -54,16 +55,12 @@ export default function MobileCarousel({ items }: Props) {
     };
     el.addEventListener('scroll', onScroll, { passive: true });
     return () => {
-      el.removeEventListener('scroll', onScroll as any);
+      el.removeEventListener('scroll', onScroll);
       cancelAnimationFrame(raf);
     };
   }, [active, count, CARD_W, CARD_GAP]);
 
-  const triplet = useMemo(() => {
-    const prev = (active - 1 + count) % count;
-    const next = (active + 1) % count;
-    return [items[prev], items[active], items[next]];
-  }, [active, count, items]);
+  // no triplet layout in scroll-snap mode
 
   // idle sway like desktop: small rotate/translate oscillation
   useEffect(() => {
@@ -109,8 +106,7 @@ export default function MobileCarousel({ items }: Props) {
           paddingLeft: `${CARD_GAP}px`,
           paddingRight: `${CARD_GAP}px`,
           scrollSnapType: "x mandatory",
-          WebkitOverflowScrolling: "touch" as any,
-          scrollbarWidth: "none" as any,
+          WebkitOverflowScrolling: "touch",
         }}
       >
         {items.map((it, i) => {
