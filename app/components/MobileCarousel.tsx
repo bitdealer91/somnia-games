@@ -21,6 +21,8 @@ export default function MobileCarousel({ items }: Props) {
   const startX = useRef(0);
   const [dragX, setDragX] = useState(0);
   const [isSnapping, setIsSnapping] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [isSettling, setIsSettling] = useState(false);
   const [time, setTime] = useState(0);
   const phasesRef = useRef<number[]>([]);
 
@@ -34,15 +36,18 @@ export default function MobileCarousel({ items }: Props) {
   );
 
   const onTouchStart = (e: React.TouchEvent) => {
+    if (showDetail || isFlipped) return;
     startX.current = e.touches[0].clientX;
     setIsSnapping(false);
     setDragX(0);
   };
   const onTouchMove = (e: React.TouchEvent) => {
+    if (showDetail || isFlipped) return;
     const d = e.touches[0].clientX - startX.current;
     setDragX(d);
   };
   const onTouchEnd = () => {
+    if (showDetail || isFlipped) return;
     const threshold = 60;
     const w = 390; // frame width
     if (Math.abs(dragX) > threshold) {
@@ -53,6 +58,9 @@ export default function MobileCarousel({ items }: Props) {
         move(dir === -1 ? 1 : -1);
         setIsSnapping(false);
         setDragX(0);
+        // subtle settle animation for the new center card
+        setIsSettling(true);
+        setTimeout(() => setIsSettling(false), 260);
       }, 260);
     } else {
       setIsSnapping(true);
@@ -130,24 +138,65 @@ export default function MobileCarousel({ items }: Props) {
           pointerEvents: "none",
         }}
       />
-      {/* center card */}
-      <img
-        src={triplet[1].frontSrc}
-        alt="center"
-        onClick={() => setShowDetail(triplet[1])}
+      {/* center flip card like desktop */}
+      <div
+        onClick={() => setIsFlipped((v) => !v)}
         style={{
           position: "absolute",
           left: 71,
           top: 175,
           width: 248,
           height: 353,
-          zIndex: 4,
+          zIndex: 6,
           cursor: "pointer",
-          transform: `translateY(${sway(1).dy}px) scale(${scaleCenter}) rotateZ(${sway(1).deg}deg)`,
-          transition: isSnapping ? "transform 260ms ease-out" : undefined,
+          transform: `translateY(${sway(1).dy}px) ${isSettling ? ' translateY(8px) rotateX(6deg)' : ''} scale(${isFlipped ? 1.3 : 1})`,
+          transition: "transform 320ms cubic-bezier(0.22,1,0.36,1)",
           transformOrigin: "center",
+          perspective: 1200,
         }}
-      />
+      >
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            height: "100%",
+            transformStyle: "preserve-3d",
+            transition: "transform 320ms cubic-bezier(0.22,1,0.36,1)",
+            transform: `rotateY(${isFlipped ? 180 : 0}deg)`,
+          }}
+        >
+          {/* front */}
+          <img
+            src={triplet[1].frontSrc}
+            alt="center-front"
+            style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", borderRadius: 12, boxShadow: "0 10px 22px rgba(0,0,0,0.35)" }}
+          />
+          {/* back with hotspots like desktop */}
+          <div style={{ position: "absolute", inset: 0, transform: "rotateY(180deg)", backfaceVisibility: "hidden", borderRadius: 12, boxShadow: "0 10px 22px rgba(0,0,0,0.35)" }}>
+            <img src={triplet[1].backSrc || triplet[1].frontSrc} alt="center-back" style={{ position: "absolute", inset: 0, borderRadius: 12 }} />
+            {triplet[1].websiteUrl && (
+              <a
+                href={triplet[1].websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{ position: "absolute", left: "13%", top: "58%", width: "74%", height: "8%" }}
+                aria-label="website"
+              />
+            )}
+            {triplet[1].xUrl && (
+              <a
+                href={triplet[1].xUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{ position: "absolute", left: "18%", top: "74%", width: "60%", height: "8%" }}
+                aria-label="X"
+              />
+            )}
+          </div>
+        </div>
+      </div>
       {/* right card */}
       {/* right full card (mostly offscreen, shows ~73px) */}
       <img
@@ -171,7 +220,7 @@ export default function MobileCarousel({ items }: Props) {
       {showDetail && (
         <div
           className="absolute inset-0 bg-black/80"
-          onClick={() => setShowDetail(null)}
+          onClick={() => { setShowDetail(null); setIsFlipped(false); }}
           style={{ zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
