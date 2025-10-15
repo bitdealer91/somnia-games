@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import CardsScene from "./components/CardsScene";
 import { cards } from "./data/cards";
 import MobileScreen2 from "./components/MobileScreen2";

@@ -21,7 +21,7 @@ export type Card3DProps = {
 };
 
 export default function Card3D(props: Card3DProps) {
-    const { title = "", description = "", frontImageSrc, backImageSrc, isActive, isFlipped, onPress, width = 184, height = 260, websiteUrl, xUrl, websiteHotspot, xHotspot } = props;
+    const { title = "", frontImageSrc, backImageSrc, isActive, isFlipped, onPress, width = 184, height = 260, websiteUrl, xUrl, websiteHotspot, xHotspot } = props;
 
 	const front = useMemo(() => {
 		return (
@@ -35,17 +35,7 @@ export default function Card3D(props: Card3DProps) {
 		);
 	}, [frontImageSrc, isActive, title, width]);
 
-	const back = useMemo(() => {
-		return (
-			<div className="absolute inset-0 [transform:rotateY(180deg)] [backface-visibility:hidden] overflow-hidden rounded-[12px]">
-				{backImageSrc ? (
-					<Image src={backImageSrc} alt={`${title} back`} fill sizes={`${width}px`} className="object-cover" priority={isActive} />
-				) : (
-					<div className="h-full w-full bg-black" />
-				)}
-			</div>
-		);
-	}, [backImageSrc, isActive, title, width]);
+    // back face is rendered inline in the component tree; no separate memo needed
 
     function handleClick() {
         // Card click keeps existing interaction (focus/flip), links handled by hotspots on the back

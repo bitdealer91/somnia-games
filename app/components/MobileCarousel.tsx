@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -29,13 +30,7 @@ export default function MobileCarousel({ items }: Props) {
   const FRAME_W = 390;
   const CARD_W = FRAME_W - CARD_PEEK; // snapped column width
 
-  // helper: programmatic navigation if ever needed
-  const move = useCallback((dir: number) => {
-    const next = (active + dir + count) % count;
-    setActive(next);
-    const node = carouselRef.current?.children[next] as HTMLElement | undefined;
-    node?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  }, [active, count]);
+  // helper retained for potential programmatic navigation (not used now)
 
   // detect active index on scroll (snap end)
   useEffect(() => {

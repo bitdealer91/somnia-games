@@ -22,8 +22,7 @@ const STAGE_WIDTH = 1716;
 const STAGE_HEIGHT = 1023;
 
 export default function CardsScene({ items }: { items: CardItem[] }) {
-	const [activeId, setActiveId] = useState<string | null>(null);
-	const [flippedIds, setFlippedIds] = useState<Set<string>>(() => new Set());
+    const [activeId, setActiveId] = useState<string | null>(null);
 	const [tiltById, setTiltById] = useState<Record<string, { rx: number; ry: number }>>({});
 	const phasesRef = useRef<Record<string, { p1: number; p2: number }>>({});
 
@@ -70,16 +69,10 @@ export default function CardsScene({ items }: { items: CardItem[] }) {
 
 	const defaultFront = "/cards/front/cover.png";
 
-	const handlePress = (id: string) => {
-		// flip on press and toggle focus to center
-		setFlippedIds((prev) => {
-			const next = new Set(prev);
-			if (next.has(id)) next.delete(id);
-			else next.add(id);
-			return next;
-		});
-		setActiveId((prev) => (prev === id ? null : id));
-	};
+    const handlePress = (id: string) => {
+        // toggle focus to center; flipped state is derived from active
+        setActiveId((prev) => (prev === id ? null : id));
+    };
 
 	return (
 		<div className="relative" style={{ width: STAGE_WIDTH, height: STAGE_HEIGHT }}>
