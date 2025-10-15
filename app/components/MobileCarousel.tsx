@@ -17,57 +17,47 @@ type Props = {
 // This carousel is tailored for a 390x844 frame with Screen2 layout numbers
 export default function MobileCarousel({ items }: Props) {
   const [active, setActive] = useState(0);
-  const [showDetail, setShowDetail] = useState<null | MobileCarouselItem>(null);
-  const startX = useRef(0);
-  const [dragX, setDragX] = useState(0);
-  const [isSnapping, setIsSnapping] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [isSettling, setIsSettling] = useState(false);
   const [time, setTime] = useState(0);
   const phasesRef = useRef<number[]>([]);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
 
   const count = items.length;
 
-  const move = useCallback(
-    (dir: number) => {
-      setActive((a) => (a + dir + count) % count);
-    },
-    [count]
-  );
+  const CARD_PEEK = 73; // how much of side card peeks into view
+  const CARD_GAP = 16;
+  const FRAME_W = 390;
+  const CARD_W = FRAME_W - CARD_PEEK; // snapped column width
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    if (showDetail || isFlipped) return;
-    startX.current = e.touches[0].clientX;
-    setIsSnapping(false);
-    setDragX(0);
-  };
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (showDetail || isFlipped) return;
-    const d = e.touches[0].clientX - startX.current;
-    setDragX(d);
-  };
-  const onTouchEnd = () => {
-    if (showDetail || isFlipped) return;
-    const threshold = 60;
-    const w = 390; // frame width
-    if (Math.abs(dragX) > threshold) {
-      setIsSnapping(true);
-      const dir = dragX < 0 ? -1 : 1;
-      setDragX(dir * (w + 40));
-      setTimeout(() => {
-        move(dir === -1 ? 1 : -1);
-        setIsSnapping(false);
-        setDragX(0);
-        // subtle settle animation for the new center card
-        setIsSettling(true);
-        setTimeout(() => setIsSettling(false), 260);
-      }, 260);
-    } else {
-      setIsSnapping(true);
-      setDragX(0);
-      setTimeout(() => setIsSnapping(false), 220);
-    }
-  };
+  const move = useCallback((dir: number) => {
+    const next = (active + dir + count) % count;
+    setActive(next);
+    const node = carouselRef.current?.children[next] as HTMLElement | undefined;
+    node?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [active, count]);
+
+  // detect active index on scroll (snap end)
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const column = CARD_W + CARD_GAP;
+        const idx = Math.round(el.scrollLeft / column);
+        if (idx !== active) {
+          setActive((idx + count) % count);
+          setIsFlipped(false);
+        }
+      });
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      el.removeEventListener('scroll', onScroll as any);
+      cancelAnimationFrame(raf);
+    };
+  }, [active, count, CARD_W, CARD_GAP]);
 
   const triplet = useMemo(() => {
     const prev = (active - 1 + count) % count;
@@ -99,166 +89,84 @@ export default function MobileCarousel({ items }: Props) {
     return { deg, dy };
   };
 
-  // rolling effect factors
-  const w = 390;
-  const p = Math.max(-1, Math.min(1, dragX / w));
-  const scaleCenter = 1 - 0.2 * Math.abs(p);
-  // side cards keep full scale; only parallax/rotation to mimic crop, not shrink
-  const scaleLeft = 1;
-  const scaleRight = 1;
+  // hover-like micro motion
 
   return (
-    <div className="absolute inset-0" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} style={{ zIndex: 3 }}>
-      {/* Track moves entire triplet so вся карточка едет целиком */}
+    <div className="absolute inset-0" style={{ zIndex: 3 }}>
       <div
+        ref={carouselRef}
         style={{
           position: "absolute",
-          inset: 0,
-          transform: `translateX(${dragX}px)`,
-          transition: isSnapping ? "transform 260ms cubic-bezier(0.22,1,0.36,1)" : undefined,
-          willChange: "transform",
-          zIndex: 3,
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          display: "grid",
+          gridAutoFlow: "column",
+          gridAutoColumns: `${CARD_W}px`,
+          gap: `${CARD_GAP}px`,
+          overflowX: "auto",
+          paddingLeft: `${CARD_GAP}px`,
+          paddingRight: `${CARD_GAP}px`,
+          scrollSnapType: "x mandatory",
+          WebkitOverflowScrolling: "touch" as any,
+          scrollbarWidth: "none" as any,
         }}
       >
-      {/* left card */}
-      {/* left full card (mostly offscreen, shows ~73px) */}
-      <img
-        src={triplet[0].frontSrc}
-        alt="left"
-        style={{
-          position: "absolute",
-          left: -175, // -(248-73)
-          top: 184,
-          width: 248,
-          height: 344,
-          zIndex: 3,
-          transform: `translateY(${sway(0).dy}px) rotateY(${p * 10}deg) rotateZ(${sway(0).deg}deg)`,
-          transition: isSnapping ? "transform 260ms ease-out" : undefined,
-          transformOrigin: "center",
-          pointerEvents: "none",
-        }}
-      />
-      {/* center flip card like desktop */}
-      <div
-        onClick={() => setIsFlipped((v) => !v)}
-        style={{
-          position: "absolute",
-          left: 71,
-          top: 175,
-          width: 248,
-          height: 353,
-          zIndex: 6,
-          cursor: "pointer",
-          transform: `translateY(${sway(1).dy}px) ${isSettling ? ' translateY(8px) rotateX(6deg)' : ''} scale(${isFlipped ? 1.3 : 1})`,
-          transition: "transform 320ms cubic-bezier(0.22,1,0.36,1)",
-          transformOrigin: "center",
-          perspective: 1200,
-        }}
-      >
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            height: "100%",
-            transformStyle: "preserve-3d",
-            transition: "transform 320ms cubic-bezier(0.22,1,0.36,1)",
-            transform: `rotateY(${isFlipped ? 180 : 0}deg)`,
-          }}
-        >
-          {/* front */}
-          <img
-            src={triplet[1].frontSrc}
-            alt="center-front"
-            style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", borderRadius: 12, boxShadow: "0 10px 22px rgba(0,0,0,0.35)" }}
-          />
-          {/* back with hotspots like desktop */}
-          <div style={{ position: "absolute", inset: 0, transform: "rotateY(180deg)", backfaceVisibility: "hidden", borderRadius: 12, boxShadow: "0 10px 22px rgba(0,0,0,0.35)" }}>
-            <img src={triplet[1].backSrc || triplet[1].frontSrc} alt="center-back" style={{ position: "absolute", inset: 0, borderRadius: 12 }} />
-            {triplet[1].websiteUrl && (
-              <a
-                href={triplet[1].websiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                style={{ position: "absolute", left: "13%", top: "58%", width: "74%", height: "8%" }}
-                aria-label="website"
-              />
-            )}
-            {triplet[1].xUrl && (
-              <a
-                href={triplet[1].xUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                style={{ position: "absolute", left: "18%", top: "74%", width: "60%", height: "8%" }}
-                aria-label="X"
-              />
-            )}
-          </div>
-        </div>
-      </div>
-      {/* right card */}
-      {/* right full card (mostly offscreen, shows ~73px) */}
-      <img
-        src={triplet[2].frontSrc}
-        alt="right"
-        style={{
-          position: "absolute",
-          left: 317,
-          top: 178,
-          width: 248,
-          height: 354,
-          zIndex: 3,
-          transform: `translateY(${sway(2).dy}px) rotateY(${p * -10}deg) rotateZ(${sway(2).deg}deg)`,
-          transition: isSnapping ? "transform 260ms ease-out" : undefined,
-          transformOrigin: "center",
-          pointerEvents: "none",
-        }}
-      />
-      </div>
-      {/* detail overlay (Screen3-like) */}
-      {showDetail && (
-        <div
-          className="absolute inset-0 bg-black/80"
-          onClick={() => { setShowDetail(null); setIsFlipped(false); }}
-          style={{ zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center" }}
-        >
-          <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ position: "relative", width: 300 }}>
-              <img
-                src={showDetail.backSrc || showDetail.frontSrc}
-                alt="detail"
-                style={{ width: "100%", height: "auto", borderRadius: 12, display: "block" }}
-              />
-              {/* clickable hotspots aligned to fields on the back side */}
-              {/* WEBSITE field area */}
-              {showDetail.websiteUrl && (
-                <a
-                  href={showDetail.websiteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  /* approx area covering the WEBSITE value row */
-                  style={{ position: "absolute", left: "13%", top: "58%", width: "74%", height: "8%", zIndex: 2 }}
-                  aria-label="website"
-                />
-              )}
-              {/* X handle area */}
-              {showDetail.xUrl && (
-                <a
-                  href={showDetail.xUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  /* approx area covering the X handle row */
-                  style={{ position: "absolute", left: "18%", top: "74%", width: "60%", height: "8%", zIndex: 2 }}
-                  aria-label="X"
-                />
-              )}
+        {items.map((it, i) => {
+          const isActive = i === active;
+          return (
+            <div key={it.id} style={{ scrollSnapAlign: "center", position: "relative" }}>
+              <div
+                onClick={() => {
+                  if (!isActive) {
+                    const node = carouselRef.current?.children[i] as HTMLElement | undefined;
+                    node?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+                    return;
+                  }
+                  setIsFlipped((v) => !v);
+                }}
+                style={{
+                  position: "relative",
+                  width: `${CARD_W}px`,
+                  height: 353 + 175, // space for top offset
+                  cursor: "pointer",
+                  transform: `translateY(${sway(i).dy}px) scale(${isActive && isFlipped ? 1.3 : 1})`,
+                  transition: "transform 320ms cubic-bezier(0.22,1,0.36,1)",
+                  transformOrigin: "center",
+                  perspective: 1200,
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    top: 175,
+                    height: 353,
+                    margin: "0 auto",
+                    width: 248,
+                    transformStyle: "preserve-3d",
+                    transition: "transform 320ms cubic-bezier(0.22,1,0.36,1)",
+                    transform: `rotateY(${isActive && isFlipped ? 180 : 0}deg)`,
+                  }}
+                >
+                  <img src={it.frontSrc} alt="front" style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", borderRadius: 12, boxShadow: "0 10px 22px rgba(0,0,0,0.35)" }} />
+                  <div style={{ position: "absolute", inset: 0, transform: "rotateY(180deg)", backfaceVisibility: "hidden", borderRadius: 12, boxShadow: "0 10px 22px rgba(0,0,0,0.35)" }}>
+                    <img src={it.backSrc || it.frontSrc} alt="back" style={{ position: "absolute", inset: 0, borderRadius: 12 }} />
+                    {it.websiteUrl && (
+                      <a href={it.websiteUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ position: "absolute", left: "13%", top: "58%", width: "74%", height: "8%" }} aria-label="website" />
+                    )}
+                    {it.xUrl && (
+                      <a href={it.xUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ position: "absolute", left: "18%", top: "74%", width: "60%", height: "8%" }} aria-label="X" />
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }
