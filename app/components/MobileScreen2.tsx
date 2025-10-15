@@ -12,7 +12,22 @@ export default function MobileScreen2() {
 
         {/* Joystick/image_1 per Figma */}
         {/* Center joystick horizontally and pin slightly above bottom; larger scale */}
-        <img src="/mobile/image_1.gif" alt="joystick" style={{ position: "absolute", left: "50%", bottom: 12, transform: "translateX(-50%)", width: 780, height: "auto", zIndex: 2, pointerEvents: "none" }} />
+        {/* Scale via transform so видимый размер меняется и внутри кадра */}
+				<img
+          src="/mobile/image_1.gif"
+          alt="joystick"
+          style={{
+            position: "absolute",
+            left: "50%",
+						bottom: -10,
+            transform: "translateX(-50%) scale(2.0)",
+            transformOrigin: "center bottom",
+            width: 600,
+            height: "auto",
+            zIndex: 2,
+            pointerEvents: "none",
+          }}
+        />
 
         <MobileCarousel
           items={[

@@ -113,13 +113,13 @@ export default function MobileCarousel({ items }: Props) {
         }}
       >
       {/* left card */}
-      {/* left full card (mostly outside, shows ~73px) */}
+      {/* left full card (mostly offscreen, shows ~73px) */}
       <img
         src={triplet[0].frontSrc}
         alt="left"
         style={{
           position: "absolute",
-          left: -175, // -(fullWidth - visibleWidth) = -(248-73)
+          left: -175, // -(248-73)
           top: 184,
           width: 248,
           height: 344,
@@ -127,6 +127,7 @@ export default function MobileCarousel({ items }: Props) {
           transform: `translateY(${sway(0).dy}px) rotateY(${p * 10}deg) rotateZ(${sway(0).deg}deg)`,
           transition: isSnapping ? "transform 260ms ease-out" : undefined,
           transformOrigin: "center",
+          pointerEvents: "none",
         }}
       />
       {/* center card */}
@@ -148,13 +149,13 @@ export default function MobileCarousel({ items }: Props) {
         }}
       />
       {/* right card */}
-      {/* right full card (mostly outside, shows ~73px) */}
+      {/* right full card (mostly offscreen, shows ~73px) */}
       <img
         src={triplet[2].frontSrc}
         alt="right"
         style={{
           position: "absolute",
-          left: 317, // 390 - visibleWidth(73)
+          left: 317,
           top: 178,
           width: 248,
           height: 354,
@@ -162,6 +163,7 @@ export default function MobileCarousel({ items }: Props) {
           transform: `translateY(${sway(2).dy}px) rotateY(${p * -10}deg) rotateZ(${sway(2).deg}deg)`,
           transition: isSnapping ? "transform 260ms ease-out" : undefined,
           transformOrigin: "center",
+          pointerEvents: "none",
         }}
       />
       </div>
