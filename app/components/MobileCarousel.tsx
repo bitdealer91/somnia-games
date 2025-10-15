@@ -24,7 +24,7 @@ export default function MobileCarousel({ items }: Props) {
 
   const count = items.length;
 
-  const CARD_PEEK = 73; // how much of side card peeks into view
+  const CARD_PEEK = 120; // increase peek so next card edge is clearly visible
   const CARD_GAP = 16;
   const FRAME_W = 390;
   const CARD_W = FRAME_W - CARD_PEEK; // snapped column width
@@ -103,8 +103,8 @@ export default function MobileCarousel({ items }: Props) {
           gridAutoColumns: `${CARD_W}px`,
           gap: `${CARD_GAP}px`,
           overflowX: "auto",
-          paddingLeft: `${CARD_GAP}px`,
-          paddingRight: `${CARD_GAP}px`,
+          paddingLeft: 0,
+          paddingRight: 0,
           scrollSnapType: "x mandatory",
           WebkitOverflowScrolling: "touch",
         }}
