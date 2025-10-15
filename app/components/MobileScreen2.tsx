@@ -21,12 +21,17 @@ export default function MobileScreen2() {
             position: "absolute",
             left: "50%",
 						bottom: -10,
-            transform: "translateX(-50%) scale(2.0)",
+						transform: "translate3d(-50%,0,0) scale(2.0)",
             transformOrigin: "center bottom",
             width: 600,
             height: "auto",
             zIndex: 2,
             pointerEvents: "none",
+            backfaceVisibility: "hidden",
+            willChange: "transform",
+            imageRendering: "-webkit-optimize-contrast",
+            contain: "paint",
+            isolation: "isolate",
           }}
         />
 

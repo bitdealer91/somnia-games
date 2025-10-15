@@ -19,9 +19,9 @@ export default function Home() {
 					<img src="/Text%201.png" alt="heading" width={858} height={512} className="headline-img" />
 				</div>
 				{/* Joystick per Figma */}
-				<div className="pointer-events-none absolute joystick" style={{ width: 1013, height: 604 }}>
-					<img src="/joystick.gif" alt="joystick" width={1013} height={604} className="landscape-only" />
-					<img src="/mobile/image_1.gif" alt="joystick-mobile" width={1013} height={604} className="portrait-only" />
+				<div className="pointer-events-none absolute joystick" style={{ width: 1013, height: 604, isolation: "isolate" }}>
+					<img src="/joystick.gif" alt="joystick" width={1013} height={604} className="landscape-only" style={{ backfaceVisibility: "hidden", willChange: "transform", transform: "translateZ(0)" }} />
+					<img src="/mobile/image_1.gif" alt="joystick-mobile" width={1013} height={604} className="portrait-only" style={{ backfaceVisibility: "hidden", willChange: "transform", transform: "translateZ(0)", imageRendering: "-webkit-optimize-contrast" }} />
 				</div>
 				{/* Cards stage */}
 				<div className="relative" style={{ width: 1716, height: 1023 }}>
