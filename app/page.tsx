@@ -14,6 +14,16 @@ export default function Home() {
 			{/* Landscape/Desktop: original stage */}
 			<div className="landscape-only" style={{ width: "100%", height: "100%" }}>
 				<StageScaler baseWidth={1716} baseHeight={1023} align="top-left" offsetX={185}>
+					{/* MORE button (desktop) */}
+					<a
+						href="https://somniagame.notion.site/"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="absolute more-btn"
+						style={{ top: -30, right: -30, zIndex: 50 }}
+					>
+						<img src="/more.png" alt="more" width={420} height={420} style={{ display: "block" }} />
+					</a>
 				{/* Text overlay per Figma */}
 				<div className="pointer-events-none absolute" style={{ left: -185, top: 0, width: 1716, height: 1023 }}>
 					<img src="/Text%201.png" alt="heading" width={858} height={512} className="headline-img" />

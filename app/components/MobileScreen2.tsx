@@ -1,11 +1,43 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
+import { useState } from "react";
 import MobileCarousel from "./MobileCarousel";
 
 export default function MobileScreen2() {
+  const [isMorePressed, setIsMorePressed] = useState(false);
   return (
     <div className="mobile-screen" aria-label="Mobile Screen2 layout">
       <div className="mobile-stage">
+        {/* MORE button (mobile) */}
+        <a
+          href="https://somniagame.notion.site/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="More"
+          style={{
+            position: "absolute",
+            top: 24,
+            left: "52%",
+            transform: isMorePressed ? "translateX(-50%) scale(0.92)" : "translateX(-50%) scale(1)",
+            transformOrigin: "center center",
+            transition: "transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+            zIndex: 5,
+            cursor: "pointer",
+            WebkitTapHighlightColor: "transparent",
+          }}
+          onMouseDown={() => setIsMorePressed(true)}
+          onMouseUp={() => setIsMorePressed(false)}
+          onMouseLeave={() => setIsMorePressed(false)}
+          onTouchStart={() => setIsMorePressed(true)}
+          onTouchEnd={() => setIsMorePressed(false)}
+          onTouchCancel={() => setIsMorePressed(false)}
+        >
+          <img
+            src="/more.png"
+            alt="more"
+            style={{ width: 300, height: "auto", display: "block", maxWidth: "none" }}
+          />
+        </a>
         {/* BG 1 base plate under BG3 (per Figma) */}
         <img src="/mobile/BG 1.png" alt="bg1" style={{ position: "absolute", left: 0, bottom: 0, width: 390, height: "auto", zIndex: 0 }} />
         {/* BG 3 overlay per Figma */}
